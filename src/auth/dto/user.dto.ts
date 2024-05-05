@@ -1,20 +1,15 @@
 import {
-  IsDate,
   IsEmail,
   IsNotEmpty,
-  IsNumber,
   IsString,
   MinLength,
 } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UserDto {
-  @ApiProperty()
-  @IsNumber()
-  id: number;
-
+export class CreateUserDto {
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @ApiProperty()
@@ -29,14 +24,6 @@ export class UserDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
+  @MinLength(8, { message: 'La contraseña tiene menos de 8 caracteres' })
   password: string;
-
-  @ApiProperty()
-  @IsDate()
-  createDate: Date;
-
-  @ApiProperty()
-  @IsDate()
-  updateDate: Date;
 }
