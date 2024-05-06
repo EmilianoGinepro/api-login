@@ -12,14 +12,11 @@ export class AuthController {
   //da problemas con el schema
   @Get()
   @ApiOperation({ summary: 'Busca un usuario por el email' })
-  async findEmail(@Body() userEmailDto: UserEmailDto) {
+  async findEmail(@Res() res, @Body() userEmailDto: UserEmailDto) {
     const email = await this.authService.getEmail(userEmailDto);
-    if (email == true) {
-      console.log(email, true);
-      return true;
-    }
-    console.log(email, false);
-    return false;
+    return res.status(HttpStatus.OK).json({
+      message: email,
+    });
   }
 
   @Post()
@@ -29,26 +26,38 @@ export class AuthController {
     description: 'El nombre, email y contraseña son obligatorios',
   })
   @ApiResponse({ status: 200, description: 'Usuario creado' })
-  async createUser(@Res() res, @Body() createUserDto: CreateUserDto) {
-    try {
-      const { name, password, email } = createUserDto;
-      if (!name || !password || !email) {
-        res.status(HttpStatus.BAD_REQUEST).json({
-          messages: 'El nombre, email y contraseña son obligatorios',
-        });
-      }
-      if (password.length < 8) {
-        res.status(HttpStatus.BAD_REQUEST).json({
-          messages: 'la contraseña debe tener minimo 8 caracteres',
-        });
-      }
-      /*const emailSend = { ...UserEmailDto, email: createUserDto.email };
+  async createUser(
+    @Res() res,
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<any> {
+    const { name, password, email } = createUserDto;
+    if (!name) {
+      res.status(HttpStatus.BAD_REQUEST).json({
+        messages: 'El nombre es obligatorios',
+      });
+    }
+    if (!password) {
+      res.status(HttpStatus.BAD_REQUEST).json({
+        messages: 'La contraseña es obligatorios',
+      });
+    }
+    if (!email) {
+      res.status(HttpStatus.BAD_REQUEST).json({
+        messages: 'El email es obligatorios',
+      });
+    }
+    if (password.length < 8) {
+      res.status(HttpStatus.BAD_REQUEST).json({
+        messages: 'la contraseña debe tener minimo 8 caracteres',
+      });
+    }
+    /*const emailSend = { ...UserEmailDto, email: createUserDto.email };
       if ((await this.findEmail(emailSend)) == true) {
         return res.status(HttpStatus.BAD_REQUEST).json({
           message: 'Ya existe un usuario con ese email',
         });
       }*/
-
+    try {
       const user = await this.authService.createUser(createUserDto);
       return res.status(HttpStatus.OK).json({
         message: 'Usuario creado con exito',

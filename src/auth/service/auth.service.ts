@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { UserEmail } from '../schemas/userEmail.schema';
@@ -22,13 +22,15 @@ export class AuthService {
     return createUser.save();
   }
 
-  async getEmail(userEmailDto: UserEmailDto): Promise<boolean> {
-    const findEmail = await this.userEmailModel.findOne({
-      email: userEmailDto,
+  async getEmail(userEmailDto: UserEmailDto) {
+    const email = userEmailDto.email;
+    const findEmail = await this.userModel.findOne({
+      email: email,
     });
-    if (findEmail) {
-      return true;
+    console.log(findEmail);
+    if (findEmail !== null) {
+      throw new ForbiddenException('El email ya se esta usando');
     }
-    return false;
+    return 'ok';
   }
 }
