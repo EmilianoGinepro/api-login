@@ -1,6 +1,4 @@
 import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
-import { AuthService } from '../service/auth.service';
-import { CreateUserDto } from '../dto/user.dto';
 import {
   ApiCreatedResponse,
   ApiOperation,
@@ -8,6 +6,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthService } from '../service/auth.service';
+import { CreateUserDto } from '../dto/user.dto';
 
 @Controller('/user')
 @ApiTags('User')
@@ -18,28 +18,25 @@ export class AuthController {
   @ApiParam({
     name: 'name',
     required: true,
-    description: 'Ingrese su nombre',
     type: 'string',
     example: 'John',
   })
   @ApiParam({
     name: 'lastname',
     required: false,
-    description: 'Ingrese su apellido',
     type: 'string',
     example: 'Doe',
   })
   @ApiParam({
     name: 'email',
     required: true,
-    description: 'Ingrese su email',
     type: 'string',
     example: 'example@email.com',
   })
   @ApiParam({
     name: 'password',
     required: true,
-    description: 'Ingrese su contraseña mayo a 8 caracteres',
+    description: 'La contraseña debe ser mayor a 8 caracteres',
     type: 'string',
     example: '123abc78',
   })
