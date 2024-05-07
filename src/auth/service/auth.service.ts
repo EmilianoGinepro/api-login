@@ -36,4 +36,26 @@ export class AuthService {
     }
     return 'ok';
   }
+
+  async updatePassword(email: string, pwd: string) {
+    const searchEmail = await this.userModel.findOne({
+      email: email,
+    });
+    if (searchEmail == null) {
+      throw new HttpException(
+        {
+          status: HttpStatus.CONFLICT,
+          error: 'El email no existe',
+        },
+        HttpStatus.CONFLICT,
+        {
+          cause: error,
+        },
+      );
+    }
+
+    const plainToHash = await hash(pwd, 10);
+    searchEmail.password = plainToHash;
+    await searchEmail.save();
+  }
 }

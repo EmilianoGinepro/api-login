@@ -1,6 +1,7 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Put, Res } from '@nestjs/common';
 import {
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -8,12 +9,14 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from '../service/auth.service';
 import { CreateUserDto } from '../dto/user.dto';
+import { UpdatePasswordDto } from '../dto/updatePassword.dto';
 
 @Controller('/user')
 @ApiTags('User')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
+  //falta mejorar la documentacion en general
+  //Creacion de usuario
   @Post()
   @ApiParam({
     name: 'name',
@@ -93,4 +96,38 @@ export class AuthController {
       res.status(HttpStatus.BAD_REQUEST).send(err);
     }
   }
+  //Actualizacion de contraseña
+  @Put()
+  @ApiParam({
+    name: 'email',
+    required: true,
+    type: 'string',
+    example: 'example@email.com',
+  })
+  @ApiOperation({
+    summary:
+      'Genera una nueva contraseña de forma aletoria y la envia por mail',
+  })
+  @ApiOkResponse({
+    description: 'Contraseña actualizada exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Error al actualizar la contraseña',
+  })
+  async updatePassword(
+    @Res() res,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ): Promise<any> {
+    const { email, password } = updatePasswordDto;
+    try {
+      await this.authService.updatePassword(email, password);
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: 'Contraseña actualizada exitosamente' });
+    } catch (err) {
+      res.status(HttpStatus.BAD_REQUEST).send(err);
+    }
+  }
+  //Login y envio de jwt
 }
