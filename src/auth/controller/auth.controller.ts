@@ -1,31 +1,60 @@
-import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { AuthService } from '../service/auth.service';
 import { CreateUserDto } from '../dto/user.dto';
-import { UserEmailDto } from '../dto/userEmail.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @Controller('/user')
 @ApiTags('User')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  //da problemas con el schema
-  @Get()
-  @ApiOperation({ summary: 'Busca un usuario por el email' })
-  async findEmail(@Res() res, @Body() userEmailDto: UserEmailDto) {
-    const email = await this.authService.getEmail(userEmailDto);
-    return res.status(HttpStatus.OK).json({
-      message: email,
-    });
-  }
-
   @Post()
+  @ApiParam({
+    name: 'name',
+    required: true,
+    description: 'Ingrese su nombre',
+    type: 'string',
+    example: 'John',
+  })
+  @ApiParam({
+    name: 'lastname',
+    required: false,
+    description: 'Ingrese su apellido',
+    type: 'string',
+    example: 'Doe',
+  })
+  @ApiParam({
+    name: 'email',
+    required: true,
+    description: 'Ingrese su email',
+    type: 'string',
+    example: 'example@email.com',
+  })
+  @ApiParam({
+    name: 'password',
+    required: true,
+    description: 'Ingrese su contraseña mayo a 8 caracteres',
+    type: 'string',
+    example: '123abc78',
+  })
   @ApiOperation({ summary: 'Creacion de usuario' })
+  @ApiCreatedResponse({
+    description: 'Usuario creado con exito',
+  })
   @ApiResponse({
-    status: 400,
+    status: HttpStatus.BAD_REQUEST,
     description: 'El nombre, email y contraseña son obligatorios',
   })
-  @ApiResponse({ status: 200, description: 'Usuario creado' })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'El mail ya esta asignado a otro usuario',
+  })
   async createUser(
     @Res() res,
     @Body() createUserDto: CreateUserDto,
@@ -51,12 +80,12 @@ export class AuthController {
         messages: 'la contraseña debe tener minimo 8 caracteres',
       });
     }
-    /*const emailSend = { ...UserEmailDto, email: createUserDto.email };
-      if ((await this.findEmail(emailSend)) == true) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          message: 'Ya existe un usuario con ese email',
-        });
-      }*/
+    //compruebo que el email no exista
+    const emailCheck = await this.authService.getEmail(email);
+    if (emailCheck !== 'ok') {
+      return emailCheck;
+    }
+
     try {
       const user = await this.authService.createUser(createUserDto);
       return res.status(HttpStatus.OK).json({

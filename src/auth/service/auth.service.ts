@@ -1,10 +1,10 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../schemas/user.schema';
 import { Model } from 'mongoose';
 import { CreateUserDto } from '../dto/user.dto';
-import { UserEmailDto } from '../dto/userEmail.dto';
 import { hash } from 'bcrypt';
+import { error } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -18,14 +18,21 @@ export class AuthService {
     return createUser.save();
   }
 
-  async getEmail(userEmailDto: UserEmailDto) {
-    const email = userEmailDto.email;
+  async getEmail(email: string) {
     const findEmail = await this.userModel.findOne({
       email: email,
     });
-    console.log(findEmail);
     if (findEmail !== null) {
-      throw new ForbiddenException('El email ya se esta usando');
+      throw new HttpException(
+        {
+          status: HttpStatus.CONFLICT,
+          error: 'El email ya existe',
+        },
+        HttpStatus.CONFLICT,
+        {
+          cause: error,
+        },
+      );
     }
     return 'ok';
   }
