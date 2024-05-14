@@ -69,12 +69,18 @@ export class AuthController {
 
     try {
       const user = await this.authService.createUser(createUserDto);
+      console.log(user);
       return res.status(HttpStatus.OK).json({
-        message: 'Usuario creado con exito',
-        usuario: user,
+        status: user.status,
+        message: user.message,
+        data: user.data,
       });
     } catch (err) {
-      res.status(HttpStatus.BAD_REQUEST).send(err);
+      res.status(HttpStatus.CONFLICT).json({
+        status: err.response.status,
+        success: err.response.success,
+        error: err.response.error,
+      });
     }
   }
   //Actualizacion de contraseña
@@ -102,12 +108,19 @@ export class AuthController {
   ): Promise<any> {
     const { email, password } = updatePasswordDto;
     try {
-      await this.authService.updatePassword(email, password);
-      return res
-        .status(HttpStatus.OK)
-        .json({ message: 'Contraseña actualizada exitosamente' });
+      const updatePass = await this.authService.updatePassword(email, password);
+      return res.status(HttpStatus.OK).json({
+        status: updatePass.status,
+        success: updatePass.success,
+        message: updatePass.message,
+      });
     } catch (err) {
-      res.status(HttpStatus.BAD_REQUEST).send(err);
+      console.log(err);
+      res.status(HttpStatus.CONFLICT).json({
+        status: 400,
+        success: false,
+        error: err,
+      });
     }
   }
   //Login y envio de jwt
@@ -144,7 +157,11 @@ export class AuthController {
       const login = await this.authService.postLogin(loginUserDto);
       return res.status(HttpStatus.OK).send(login);
     } catch (err) {
-      res.status(HttpStatus.BAD_REQUEST).send(err);
+      res.status(HttpStatus.CONFLICT).json({
+        status: err.response.status,
+        success: err.response.success,
+        error: err.response.error,
+      });
     }
   }
 }

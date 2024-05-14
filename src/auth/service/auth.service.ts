@@ -15,12 +15,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<any> {
     const { name, password, email } = createUserDto;
     if (!name) {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'El nombre es obligatorios',
         },
         HttpStatus.CONFLICT,
@@ -33,6 +34,7 @@ export class AuthService {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'La contraseña es obligatorios',
         },
         HttpStatus.CONFLICT,
@@ -45,6 +47,7 @@ export class AuthService {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'El email es obligatorios',
         },
         HttpStatus.CONFLICT,
@@ -57,6 +60,7 @@ export class AuthService {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'la contraseña debe tener minimo 8 caracteres',
         },
         HttpStatus.CONFLICT,
@@ -68,7 +72,13 @@ export class AuthService {
     const plainToHash = await bcrypt.hash(password, 10);
     createUserDto = { ...createUserDto, password: plainToHash };
     const createUser = new this.userModel(createUserDto);
-    return createUser.save();
+    const newUser = await createUser.save();
+    return {
+      status: HttpStatus.OK,
+      success: true,
+      message: 'Usuario creado con exito',
+      data: newUser,
+    };
   }
 
   async getEmail(email: string) {
@@ -79,6 +89,7 @@ export class AuthService {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'El email ya existe',
         },
         HttpStatus.CONFLICT,
@@ -94,10 +105,24 @@ export class AuthService {
     const searchEmail = await this.userModel.findOne({
       email: email,
     });
+    if (!pwd) {
+      throw new HttpException(
+        {
+          status: HttpStatus.CONFLICT,
+          success: false,
+          error: 'Ingrese una contraseña',
+        },
+        HttpStatus.CONFLICT,
+        {
+          cause: error,
+        },
+      );
+    }
     if (searchEmail == null) {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'El email no existe',
         },
         HttpStatus.CONFLICT,
@@ -111,6 +136,11 @@ export class AuthService {
     searchEmail.password = plainToHash;
     searchEmail.updateDate = new Date();
     await searchEmail.save();
+    return {
+      status: HttpStatus.OK,
+      success: true,
+      message: 'Password actualizada',
+    };
   }
 
   async postLogin(loginUserDto: LoginUserDto): Promise<any> {
@@ -118,11 +148,12 @@ export class AuthService {
     const findUser = await this.userModel.findOne({
       email: email,
     });
-    //valido que el emial o el password no vengan vacio
+    //valido que el email o el password no vengan vacios
     if (!email || !password) {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'El email y la contraseña son obligatorios',
         },
         HttpStatus.CONFLICT,
@@ -136,6 +167,7 @@ export class AuthService {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'el email o la contraseña no son validos',
         },
         HttpStatus.CONFLICT,
@@ -150,6 +182,7 @@ export class AuthService {
       throw new HttpException(
         {
           status: HttpStatus.CONFLICT,
+          success: false,
           error: 'el email o la contraseña no son validos',
         },
         HttpStatus.CONFLICT,
@@ -169,6 +202,7 @@ export class AuthService {
     };
     return {
       status: HttpStatus.OK,
+      success: true,
       message: 'Login correcto',
       data: data,
     };
