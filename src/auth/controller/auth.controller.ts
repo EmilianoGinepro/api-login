@@ -35,7 +35,7 @@ export class AuthController {
     name: 'email',
     required: true,
     type: 'string',
-    example: 'example@email.com',
+    example: 'test@email.com',
   })
   @ApiParam({
     name: 'password',
@@ -91,9 +91,15 @@ export class AuthController {
     type: 'string',
     example: 'example@email.com',
   })
+  @ApiParam({
+    name: 'password',
+    required: true,
+    description: 'La contraseña debe ser mayor a 8 caracteres',
+    type: 'string',
+    example: '123abc78',
+  })
   @ApiOperation({
-    summary:
-      'Genera una nueva contraseña de forma aletoria y la envia por mail',
+    summary: 'Ingresa una nueva clave',
   })
   @ApiOkResponse({
     description: 'Contraseña actualizada exitosamente',
@@ -129,7 +135,7 @@ export class AuthController {
     name: 'email',
     required: true,
     type: 'string',
-    example: 'example@email.com',
+    example: 'test@email.com',
   })
   @ApiParam({
     name: 'password',
