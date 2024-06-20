@@ -61,7 +61,7 @@ export class AuthService {
         {
           status: HttpStatus.CONFLICT,
           success: false,
-          error: 'la contraseña debe tener minimo 8 caracteres',
+          error: `la contraseña debe tener minimo 8 caracteres. tiene: ${password.length} la pass es: ${password}`,
         },
         HttpStatus.CONFLICT,
         {

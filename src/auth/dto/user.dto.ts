@@ -24,6 +24,6 @@ export class CreateUserDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MinLength(8, { message: 'La contraseña tiene menos de 8 caracteres' })
+  @MinLength(8)
   password: string;
 }

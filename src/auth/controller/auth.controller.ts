@@ -16,7 +16,6 @@ import { LoginUserDto } from '../dto/loginUser.dto';
 @ApiTags('User')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  //falta mejorar la documentacion en general
   //Creacion de usuario
   @Post()
   @ApiParam({
@@ -69,7 +68,6 @@ export class AuthController {
 
     try {
       const user = await this.authService.createUser(createUserDto);
-      console.log(user);
       return res.status(HttpStatus.OK).json({
         status: user.status,
         message: user.message,
